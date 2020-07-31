@@ -29,7 +29,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 SUITE = all
-PROJECT = template
+PROJECT = stars
 
 # Run tests
 tests: test
