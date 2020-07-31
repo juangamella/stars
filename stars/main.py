@@ -45,26 +45,23 @@ sem = sempler.LGANM(W, (1,2))
 true_cov = sem.sample(population=True).covariance
 X = sem.sample(n)
 
-alphas = np.linspace(0,1,10)
 N = int(n / np.floor(10 * np.sqrt(n)))
 
 print(N)
 
-insts, estimates = stars.fit(X, 0.9, alphas, N, mode='cd', debug=True)
+opt, (inst, estimates) = stars.fit_w_glasso(X, 0.05, N, start = 0, step = 0.05, tol=1e-5, max_iter=10, debug=False)
 
-maximum, index = 0, 0
-for i,instability in enumerate(insts):
-    print(i,instability)
-    if instability >= maximum:
-        maximum, index = instability, i
-    else:
-        break
+#estimates, precisions = stars.glasso(stars.subsample(X, N), 0.01)
+
 
 plt.subplot(131)
-plt.imshow(estimates[index, 0, :, :])
+plt.imshow(estimates[0, :, :])
 plt.subplot(132)
-plt.imshow(estimates[index, 1, :, :])
+plt.imshow(estimates[1, :, :])
 plt.subplot(133)
-plt.imshow(sem.W + sem.W.T)
+true_precision = np.linalg.inv(sem.sample(population=True).covariance)
+true_precision -= np.diag(np.diag(true_precision))
+plt.imshow((true_precision != 0).astype(int))
 plt.show(block=False)
+
 

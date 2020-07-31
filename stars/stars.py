@@ -190,7 +190,7 @@ def optimize(fun, thresh, smaller, difference, start, step, max_iter, tol = 1e-5
     i = 0    
     while i < max_iter and difference(val, thresh) > tol:        
         next_val = fun(x + step)
-        print("  ", x + step, next_val) if debug else None
+        print(i, ": ", x + step) if debug else None
         if not smaller(next_val, thresh):
             step /= 2
         else:
