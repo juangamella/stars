@@ -172,8 +172,6 @@ class StarTests(unittest.TestCase):
             self.assertEqual((4,4), estimate.shape)
             self.assertTrue(np.sum(np.logical_and(estimate != 1, estimate != 0)) == 0)
             self.assertTrue((np.diag(estimate) == 0).all())
-
-        
         
 def disjoint_rows(A, B):
     """Check that two arrays have disjoint rows"""

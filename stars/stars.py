@@ -37,7 +37,7 @@ from sklearn.covariance import GraphicalLasso
 #---------------------------------------------------------------------
 #
 
-def fit_w_glasso(X, beta, N, start=0, step=0.05, tol=1e-5, max_iter=10, debug=False):
+def fit_w_glasso(X, beta, N, start=0, step=0.05, tol=1e-5, precision_tol = 1e-4, max_iter=10, debug=False):
     """Wrapper function to run StARS using the Graphical Lasso from
     scikit.learn. The estimator is run with the default parameters.
 
@@ -58,7 +58,7 @@ def fit_w_glasso(X, beta, N, start=0, step=0.05, tol=1e-5, max_iter=10, debug=Fa
       - the subsample estimates at that regularization value
 
     """
-    estimator = glasso
+    estimator = lambda subsamples, alpha: glasso(subsamples, alpha, precision_tol = precision_tol, debug=debug)
     return fit(X, beta, estimator, N, start, step, tol, max_iter, debug)
 
 def fit(X, beta, estimator, N, start=0, step=0.05, tol=1e-5, max_iter=10, debug=False):
@@ -88,6 +88,8 @@ def fit(X, beta, estimator, N, start=0, step=0.05, tol=1e-5, max_iter=10, debug=
     and returns the adjacency matrices of the graph estimates for each subsample.
     """
     (n,p) = X.shape
+    # Standardize the data
+    X = (X - X.mean(axis=0)) / X.std(axis=0)
     # Subsample the data
     subsamples = subsample(X, N)
     # Solve the supremum alpha as in
@@ -141,7 +143,7 @@ def estimate_instability(subsamples, estimator, lmbda, return_estimates=False):
     else:
         return total_instability
     
-def glasso(subsamples, alpha, precision_tolerance = 1e-3, mode='cd', return_precisions = False):
+def glasso(subsamples, alpha, precision_tol=1e-4, mode='cd', return_precisions = False, debug=False):
     """Run the graphical lasso from scikit learn over the given
     subsamples, at the given regularization level.
 
@@ -165,7 +167,7 @@ def glasso(subsamples, alpha, precision_tolerance = 1e-3, mode='cd', return_prec
     for j,sample in enumerate(subsamples):
         precision = g.fit(sample).precision_
         precisions[j,:,:] = precision - np.diag(np.diag(precision))
-    estimates = (abs(precisions) > precision_tolerance).astype(int)
+    estimates = (abs(precisions) > precision_tol).astype(int)
     if return_precisions:
         return estimates, precisions
     else:
