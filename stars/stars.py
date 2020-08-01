@@ -94,10 +94,8 @@ def fit(X, beta, estimator, N, start=0, step=0.05, tol=1e-5, max_iter=10, debug=
     # (https://arxiv.org/pdf/1006.3316.pdf, page 6)
     # Set up functions for the search procedure
     search_fun = lambda lmbda: estimate_instability(subsamples, estimator, lmbda)
-    smaller = lambda x,y: x[0] < y
-    difference = lambda x,y: y - x[0]
     # Run the search procedure
-    opt_lambda, estimates = optimize(search_fun, beta, smaller, difference, start, step, max_iter, tol, debug)
+    opt_lambda, estimates = optimize(search_fun, beta, start, step, max_iter, tol, debug)
     return opt_lambda, estimates
 
 def subsample(X, N):
@@ -117,7 +115,7 @@ def subsample(X, N):
     rng = np.random.default_rng()
     return rng.choice(X, axis=0, replace=False, size=(N,b))
 
-def estimate_instability(subsamples, estimator, lmbda):
+def estimate_instability(subsamples, estimator, lmbda, return_estimates=False):
     """Estimate the instability using a set of subsamples, as in
     (https://arxiv.org/pdf/1006.3316.pdf, page 6)
 
@@ -138,41 +136,47 @@ def estimate_instability(subsamples, estimator, lmbda):
     # In the following, the division by 2 is to account for counting
     # every edge twice (as the estimate matrix is symmetric)
     total_instability = np.sum(edge_instability, axis=(0,1)) / scipy.special.binom(p,2) / 2
-    return (total_instability, estimates)
+    if return_estimates:
+        return total_instability, estimates
+    else:
+        return total_instability
     
-def glasso(subsamples, alpha, mode='cd'):
-    """
-    Run the graphical lasso from scikit learn over the given
+def glasso(subsamples, alpha, precision_tolerance = 1e-3, mode='cd', return_precisions = False):
+    """Run the graphical lasso from scikit learn over the given
     subsamples, at the given regularization level.
 
     Parameters:
       - subsamples (N x b x p np.array): the subsample array
-      - lmbda (float): the regularization parameter at which to run the estimator
+      - alpha (float): the regularization parameter at which to run
+        the estimator, taken as 1/lambda, i.e, lower values mean
+        sparser
 
     Returns:
       - estimates (N x p x p): The adjacency matrix of the graph
         estimated for each subsample
+
     """
     (N,_,p) = subsamples.shape
     precisions = np.zeros((len(subsamples),p,p))
-    g = GraphicalLasso(alpha = alpha,
+    g = GraphicalLasso(alpha = 1 / alpha,
                        #tol = tol,
                        #max_iter = max_iter,
                        mode = mode)
     for j,sample in enumerate(subsamples):
         precision = g.fit(sample).precision_
         precisions[j,:,:] = precision - np.diag(np.diag(precision))
-    estimates = (precisions != 0).astype(int)
-    return estimates
+    estimates = (abs(precisions) > precision_tolerance).astype(int)
+    if return_precisions:
+        return estimates, precisions
+    else:
+        return estimates
 
-def optimize(fun, thresh, smaller, difference, start, step, max_iter, tol = 1e-5, debug=False):
-    """Given a function fun:X -> V and a (float) threshold thresh,
+def optimize(fun, thresh, start, step, max_iter, tol = 1e-5, debug=False):
+    """Given a function fun:X -> R and a (float) threshold thresh,
     approximate the supremum \sup_x \{fun(x) \leq thresh\}. Adapted
     version of the bisection method.
 
     Additional parameters:
-      - smaller (function): Function may not return values directly in the same space as thresh, use this function to compare
-      - difference (function): Same as smaller, computes difference between thresh and the value return by fun
       - start (value in X): initial value for x
       - step (value in X): initial step at which to increase x
       - max_iter (int): maximum number of iterations of the procedure
@@ -185,16 +189,16 @@ def optimize(fun, thresh, smaller, difference, start, step, max_iter, tol = 1e-5
 
     """
     x, val = start, fun(start)
-    if not smaller(val, thresh):
+    if val > thresh:
         raise Exception("Invalid starting value")
     i = 0    
-    while i < max_iter and difference(val, thresh) > tol:        
+    while i < max_iter and thresh - val > tol:        
         next_val = fun(x + step)
-        print(i, ": ", x + step) if debug else None
-        if not smaller(next_val, thresh):
+        if next_val > thresh:
+            print("  ",i,": f(", x+ step, ")=",val,">", thresh)
             step /= 2
         else:
-            print("JUMP to (", step, ")", x + step, " - diff ", difference(val, thresh)) if debug else None
+            print("JUMP ",i,": f(", x+ step, ")=",val," - delta: ", thresh - val) if debug else None
             x += step
             val = next_val
         i += 1

@@ -75,20 +75,16 @@ class StarTests(unittest.TestCase):
 
     def test_optimize(self):
         thresh =  -0.75
-        f = lambda x: ("additional_param", x**0.5 - 2**x)
+        f = lambda x: x**0.5 - 2**x
         # Check execution with and without debug options
         stars.optimize(f,
                        thresh,
-                       lambda x,y: x[1] < y,
-                       lambda x,y: y - x[1],
                        0,
                        0.05,
                        10,
                        debug=True)
         opt, val = stars.optimize(f,
                                   thresh,
-                                  lambda x,y: x[1] < y,
-                                  lambda x,y: y - x[1],
                                   0,
                                   0.05,
                                   10,
@@ -96,24 +92,19 @@ class StarTests(unittest.TestCase):
         # Check that the approximation does not get worse with the
         # number of iterations, and that it is in fact a supremum
         prev = -np.infty
-        f = lambda x: (x**0.5 - 2**x, "additional_param")
-        smaller = lambda x,y: x[0] < y
         for max_iter in [5, 10, 20, 30]:
             opt, val = stars.optimize(f,
                                       thresh,
-                                      smaller,
-                                      lambda x,y: y - x[0],
                                       0,
                                       0.05,
                                       max_iter,
                                       tol = 1e-6,
                                       debug=False)
-            self.assertLessEqual(val[0], thresh)
-            self.assertLessEqual(f(opt)[0], thresh)
-            self.assertTrue(smaller(val, thresh))
-            self.assertLessEqual(prev, val[0])
-            self.assertLessEqual(prev, f(opt)[0])
-            prev = val[0]
+            self.assertLessEqual(val, thresh)
+            self.assertLessEqual(f(opt), thresh)
+            self.assertLessEqual(prev, val)
+            self.assertLessEqual(prev, f(opt))
+            prev = val
 
     def test_glasso(self):
         # Test that the Graphical Lasso wrapper actually returns
@@ -146,7 +137,9 @@ class StarTests(unittest.TestCase):
         estimator = lambda subsamples, alpha: estimates
         X = np.random.uniform(size=(100, 4, 4))
         S = stars.subsample(X, N)
-        instability, returned_estimates = stars.estimate_instability(S, estimator, 0.01)
+        instability = stars.estimate_instability(S, estimator, 0.01)
+        self.assertEqual(instability, 0)
+        instability, returned_estimates = stars.estimate_instability(S, estimator, 0.01, return_estimates = True)
         self.assertEqual(instability, 0)
         for estimate in returned_estimates:
             self.assertEqual((4,4), estimate.shape)
@@ -171,7 +164,9 @@ class StarTests(unittest.TestCase):
         estimator = lambda subsamples, alpha: estimates
         X = np.random.uniform(size=(100, 4, 4))
         S = stars.subsample(X, N)
-        instability, returned_estimates = stars.estimate_instability(S, estimator, 0.01)
+        instability = stars.estimate_instability(S, estimator, 0.01)
+        self.assertEqual(instability, 0.5)
+        instability, returned_estimates = stars.estimate_instability(S, estimator, 0.01, return_estimates=True)
         self.assertEqual(instability, 0.5)
         for estimate in returned_estimates:
             self.assertEqual((4,4), estimate.shape)
