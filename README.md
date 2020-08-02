@@ -4,12 +4,17 @@ This repository contains an implementation of the StARS algorithm, from the pape
 
 ## Requirements
 
-Minimum requirements (see [setup.py](setup.py):
+Minimum requirements (see [setup.py](setup.py)):
 
 - Standard library
 - `numpy`
 
-To run with the [Graphical Lasso](https://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphicalLasso.html) from scikit-learn:
+To run with the [Graphical Lasso](https://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphicalLasso.html) from Scikit-learn:
 - Standard library
 - `numpy`
 - `sklearn>=0.20`
+
+## Example: Using the Graphical Lasso implementation from sklearn
+
+## Example: Using an estimator of your choice
+
