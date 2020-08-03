@@ -27,7 +27,8 @@ Parameters:
 - **step** (float, optional): initial step at which to increase lambda. Defaults to 1.
 - **tol** (float, optional): tolerance of the search procedure, i.e. the search procedure stops when the instability at a given lambda is below `tol` of `beta`. Defaults to 1e-5.
 - **max_iter** (int, optional): max number of iterations for which the search procedure is run, i.e. the max number of times the estimator is run. Defaults to 20.
-- **debug** (bool, optional): if debugging messages should be printed during execution. Defaults to False.
+- **glasso_params** (dict, optional): Dictionary used to pass additional parameters to the `sklearn.covariance.GraphicalLasso`. You can see a list of available parameters [here](https://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphicalLasso.html). Defaults to `{}`.
+- **debug** (bool, optional): if debugging messages should be printed during execution. Defaults to ```python False```.
 
 Returns:
 
