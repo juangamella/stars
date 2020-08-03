@@ -34,7 +34,9 @@ Returns:
 
 - **estimate** (*np.array*): The adjacency matrix of the resulting graph estimate.
 
-Example (with default parameters and debug messages):
+### Examples 
+
+Running `stars.glasso.fit` with default parameters and debug messages:
 
 ```python
 import numpy as np
@@ -49,7 +51,7 @@ X = np.random.multivariate_normal(np.zeros(100), true_covariance, size=400)
 estimate = stars.glasso.fit(X, debug=True)
 ```
 
-Example (with additional parameters for `sklearn.covariance.GraphicalLasso`):
+Running `stars.glasso.fit` with additional parameters for `sklearn.covariance.GraphicalLasso`:
 
 ```python
 import numpy as np
