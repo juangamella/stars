@@ -26,11 +26,12 @@ Parameters:
 
 - **X** (*np.array*): Array containing n observations of p variables. Columns are the observations of a single variable
 - **beta** (*float*, optional): Maximum allowed instability between subsample estimates. Defaults to 0.05, the value recommended in the paper.
-- **N** (*int*, optional): Number of subsamples, must be divisor of n. Defaults to the value recommended in the paper, i.e. `int(n / np.floor(10 * np.sqrt(n)))`.
-- **start** (*float*, optional): Starting lambda in the search procedure. Defaults to 1.
+- **N** (*int*, optional): Number of subsamples, must be a divisor of n. Defaults to the value recommended in the paper, i.e. `int(n / np.floor(10 * np.sqrt(n)))`.
+- **start** (*float*, optional): Starting lambda for the search procedure. Defaults to 1.
 - **step** (*float*, optional): Initial step at which to increase lambda. Defaults to 1.
 - **tol** (*float*, optional): Tolerance of the search procedure, i.e. the search procedure stops when the instability at a given lambda is below `tol` of `beta`. Defaults to 1e-5.
-- **max_iter** (*int*, optional): Maximum number of iterations for which the search procedure is run, i.e. the maximum number of times the estimator is run. Defaults to 20.
+- **precision_tol** (*float*, optional): Cutoff value at which nonzero elements of the precision matrix returned by the graphical lasso are considered edges in the graph. Defaults to 1e-4.
+- **max_iter** (*int*, optional): Maximum number of iterations for which the search procedure is run. It corresponds to the maximum number of times the estimator is run. Defaults to 20.
 - **glasso_params** (*dict*, optional): Dictionary used to pass additional parameters to `sklearn.covariance.GraphicalLasso`. You can find a list of available parameters [here](https://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphicalLasso.html). Defaults to `{}`.
 - **debug** (*bool*, optional): If debugging messages should be printed during execution. Defaults to `False`.
 
@@ -91,7 +92,7 @@ Parameters (for `stars.fit`):
 - **start** (*float*, optional): Starting lambda in the search procedure. Defaults to 1.
 - **step** (*float*, optional): Initial step at which to increase lambda. Defaults to 1.
 - **tol** (*float*, optional): Tolerance of the search procedure, i.e. the search procedure stops when the instability at a given lambda is below `tol` of `beta`. Defaults to 1e-5.
-- **max_iter** (*int*, optional): Maximum number of iterations for which the search procedure is run, i.e. the maximum number of times the estimator is run. Defaults to 20.
+- **max_iter** (*int*, optional): Maximum number of iterations for which the search procedure is run. It corresponds to the maximum number of times the estimator is run. Defaults to 20.
 - **debug** (*bool*, optional): If debugging messages should be printed during execution. Defaults to `False`.
 
 Returns:
