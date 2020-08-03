@@ -70,7 +70,9 @@ estimate = stars.glasso.fit(X, glasso_params = args)
 ## Using an estimator of your choice
 
 **Estimator function**
+
 (#estimator-function)
+
 StARS can be used to select the regularization parameter for other graphical model estimators. To do this, your estimator must be wrapped in a function which takes two arguments:
 
 - **subsamples** (*np.array*): An array containing the subsampled data, of dimension `Nxbxp`, where `N` is the number of subsamples, `b=n/N` and `p` is the number of variables.
