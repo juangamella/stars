@@ -14,7 +14,7 @@ To run with the [Graphical Lasso](https://scikit-learn.org/stable/modules/genera
 - `numpy`
 - `sklearn>=0.20`
 
-## Using the Graphical Lasso implementation from sklearn
+## Using the Graphical Lasso estimator from sklearn
 
 The function `stars.glasso.fit` selects the regularization parameter via StARS, and then runs Scikit-learn's [Graphical Lasso](https://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphicalLasso.html) over the data.
 
