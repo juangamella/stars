@@ -111,7 +111,7 @@ def subsample(X, N):
     # Subsample without replacement
     return rng.choice(X, axis=0, replace=False, size=(N,b))
 
-def estimate_instability(subsamples, estimator, lmbda):
+def estimate_instability(subsamples, estimator, lmbda, return_estimates=False):
     """Estimate the instability using a set of subsamples, as in
     (https://arxiv.org/pdf/1006.3316.pdf, page 6)
 
@@ -121,6 +121,8 @@ def estimate_instability(subsamples, estimator, lmbda):
         documentation for stars.fit for more info.
       - lmbda (float): the regularization parameter at which to run
         the estimator
+      - return_estimates (bool, optional): If the estimate for each
+        subsample should also be returned. Defaults to False.
 
     Returns:
       - instability (float): The estimated total instability
@@ -133,7 +135,10 @@ def estimate_instability(subsamples, estimator, lmbda):
     # In the following, the division by 2 is to account for counting
     # every edge twice (as the estimate matrix is symmetric)
     total_instability = np.sum(edge_instability, axis=(0,1)) / comb(p, 2) / 2
-    return total_instability
+    if return_estimates:
+        return total_instability, estimates
+    else:
+        return total_instability
     
 def find_supremum(fun, thresh, start, step, max_iter, tol = 1e-5, debug=False):
     """Given a function fun:X -> R and a (float) threshold thresh,
