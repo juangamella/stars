@@ -38,29 +38,42 @@ def fit(X, estimator, beta=0.05, N=None, start=1, step=1, tol=1e-5, max_iter=20,
     """Run the StARS algorithm to select the regularization parameter for the given estimator.
 
     Parameters:
-      - X (n x p np.array): n observations of p variables
-      - estimator (function): estimator to be used*
-      - beta (float, optional): maximum allowed instability between subsample estimates
-      - N (int, optional): number of subsamples, must be divisor of n. Defaults
-        to the value recommended in the paper
-        (https://arxiv.org/pdf/1006.3316.pdf, page 9): int(n / np.floor(10 * np.sqrt(n)))
-      - start (float, optional): initial lambda
-      - step (float, optional): initial step at which to increase lambda
-      - tol (float, optional): tolerance of the search procedure
-      - max_iter (int, optional): max number of iterations to run
-        the search procedure, that is, max number of times the estimator
-        is run
-      - debug (bool, optiona): if debugging messages should be printed
-        during execution
+      - X (np.array): Array containing n observations of p
+          variables. Columns are the observations of a single variable
+      - estimator (function): Wrapper function for your estimator, as
+          described below.
+      - beta (float, optional): Maximum allowed instability between
+          subsample estimates. Defaults to 0.05, the value recommended in the
+          paper.
+      - N (int, optional): Number of subsamples, must be divisor of
+          n. Defaults to the value recommended in the paper,
+          i.e. int(n / np.floor(10 np.sqrt(n))).
+      - start (float, optional): Starting lambda in the search
+          procedure. Defaults to 1.
+      - step (float, optional): Initial step at which to increase
+          lambda. Defaults to 1.
+      - tol (float, optional): Tolerance of the search procedure,
+          i.e. the search procedure stops when the instability at a given
+          lambda is below tol of beta. Defaults to 1e-5.
+      - max_iter (int, optional): Maximum number of iterations for which
+          the search procedure is run, i.e. the maximum number of times
+          the estimator is run. Defaults to 20.
+      - debug (bool, optional): If debugging messages should be printed
+          during execution. Defaults to False.
 
     Returns:
-      - estimate (p x p np.array): the estimate at the regularization
-        value selected by StARS
+      - estimate (np.array): The adjacency matrix of the resulting
+          graph estimate.
 
-    *Note on the estimator: It must be a function that takes as arguments:
-      - subsamples (N x p x p np.array)
-      - lambda (float): the regularization parameter
-    and returns the adjacency matrices of the graph estimates for each subsample.
+    Estimator function: it must take two arguments:
+
+    - subsamples (np.array): An array containing the subsampled data,
+        of dimension Nxbxp, where N is the number of subsamples,
+        b=n/N and p is the number of variables.
+    - lambda (float): The regularization value at which to run the estimator.
+    
+    and it must return a Nxpxp np.array containing the adjacency
+    matrix (0s or 1s) of the estimate for each subsample.
     """
     (n,p) = X.shape
     # Standardize the data
@@ -78,15 +91,15 @@ def fit(X, estimator, beta=0.05, N=None, start=1, step=1, tol=1e-5, max_iter=20,
     return estimator(subsample(X, 1), opt)[0]
 
 def subsample(X, N):
-    """
-    Given observations of p variables X, return N subsamples.
+    """Given n observations of p variables X, return N subsamples.
 
     Parameters:
-      - X (np.array): observations
-      - N (int): number of subsamples
+      - X (np.array): Observations. Columns correspond to variables.
+      - N (int): Number of subsamples. Must be a divisor of n.
 
     Returns:
-      - Subsamples (N x n/N x p np.array)
+      - Subsamples (np.array): Array containing the subsampled data,
+        of dimension Nxnxp.
     """
     # Check that N is appropriate
     if len(X) % N != 0 or N == 0:
@@ -98,19 +111,20 @@ def subsample(X, N):
     # Subsample without replacement
     return rng.choice(X, axis=0, replace=False, size=(N,b))
 
-def estimate_instability(subsamples, estimator, lmbda, return_estimates=False):
+def estimate_instability(subsamples, estimator, lmbda):
     """Estimate the instability using a set of subsamples, as in
     (https://arxiv.org/pdf/1006.3316.pdf, page 6)
 
     Parameters:
-      - subsamples (N x b x p np.array): the subsample array
-      - estimator (function): the estimator to be used
-      - lmbda (float): the regularization parameter at which to run the estimator
+      - subsamples (np.array): the subsample array
+      - estimator (function): the estimator to be used. See
+        documentation for stars.fit for more info.
+      - lmbda (float): the regularization parameter at which to run
+        the estimator
 
     Returns:
-      - (float) The estimated total instability
-      - estimates (N x p x p): The adjacency matrix of the graph
-        estimated for each subsample
+      - instability (float): The estimated total instability
+
     """
     estimates = estimator(subsamples, lmbda)
     p = subsamples.shape[2]
@@ -119,27 +133,26 @@ def estimate_instability(subsamples, estimator, lmbda, return_estimates=False):
     # In the following, the division by 2 is to account for counting
     # every edge twice (as the estimate matrix is symmetric)
     total_instability = np.sum(edge_instability, axis=(0,1)) / comb(p, 2) / 2
-    if return_estimates:
-        return total_instability, estimates
-    else:
-        return total_instability
+    return total_instability
     
 def find_supremum(fun, thresh, start, step, max_iter, tol = 1e-5, debug=False):
     """Given a function fun:X -> R and a (float) threshold thresh,
     approximate the supremum \sup_x \{fun(x) \leq thresh\}. Adapted
     version of the bisection method.
 
-    Additional parameters:
-      - start (value in X): initial value for x
-      - step (value in X): initial step at which to increase x
-      - max_iter (int): maximum number of iterations of the procedure
-      - tol (float): tolerance, i.e. if difference between thresh and current fun(x) is below tol, stop the procedure
-      - debug (Bool): if True, print debug messages
+    Parameters:
+
+      - fun (function): f:X->R. The function for which we perform the search
+      - thresh (float): The given threshold
+      - start (value in X): Initial value for x
+      - step (value in X): Initial step at which to increase x
+      - max_iter (int, optional): Maximum number of iterations of the procedure
+      - tol (float, optional): Tolerance, i.e. if difference between
+        thresh and current fun(x) is below tol, stop the procedure
+      - debug (bool, optional): If True, print debug messages
 
     Returns:
-      - x (value in X): the approximated supremum
-      - val (value in V): the value of the function at x
-
+      - x (value in X): the approximated supremum \sup_x \{fun(x) \leq thresh\}
     """
     x, val = start, fun(start)
     if val > thresh:
@@ -159,12 +172,17 @@ def find_supremum(fun, thresh, start, step, max_iter, tol = 1e-5, debug=False):
 
 def comb(n,k):
     """Return the number of ways to choose k items from n items without
-    repetition and without order."""
+    repetition and without order.
+
+    """
     return math.factorial(n) / (math.factorial(k) * math.factorial(n-k))
 
 def neighbourhood_graph(p, max_nonzero=2, rho=0.245):
-    """Generate a "neighborhood graph" o p variables as described in page 10 of the
-    paper (https://arxiv.org/pdf/1006.3316.pdf). Return its precision matrix."""
+    """Generate a "neighborhood graph" o p variables as described in page
+    10 of the paper (https://arxiv.org/pdf/1006.3316.pdf). Return its
+    precision matrix.
+
+    """
     Y = np.random.uniform(size=(p,2))
     prob = np.zeros((p,p))
     precision = np.zeros((p,p))

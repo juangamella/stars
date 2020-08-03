@@ -34,27 +34,39 @@ import stars
 from sklearn.covariance import GraphicalLasso
 
 def fit(X, beta=0.05, N=None, start=1, step=1, tol=1e-5, precision_tol = 1e-4, max_iter=20, glasso_params={}, debug=False):
-    """Wrapper function to run StARS using the Graphical Lasso from
-    scikit.learn. The estimator is run with the default parameters.
+    """Function to run StARS using the Graphical Lasso from
+    scikit.learn.
 
     Parameters:
-      - X (n x p np.array): n observations of p variables
-      - beta (float, optional): maximum allowed instability between subsample estimates
-      - N (int, optional): number of subsamples, must be divisor of n. Defaults
-        to the value recommended in the paper
-        (https://arxiv.org/pdf/1006.3316.pdf, page 9): int(n / np.floor(10 * np.sqrt(n)))
-      - start (float, optional): initial lambda
-      - step (float, optional): initial step at which to increase lambda
-      - tol (float, optional): tolerance of the search procedure
-      - max_iter (int, optional): max number of iterations to run
-        the search procedure, that is, max number of times the estimator
-        is run
-      - debug (bool, optional): if debugging messages should be printed
-        during execution
+      - X (np.array): Array containing n observations of p
+          variables. Columns are the observations of a single variable
+      - beta (float, optional): Maximum allowed instability between
+          subsample estimates. Defaults to 0.05, the value recommended in the
+          paper.
+      - N (int, optional): Number of subsamples, must be divisor of
+          n. Defaults to the value recommended in the paper,
+          i.e. int(n / np.floor(10 np.sqrt(n))).
+      - start (float, optional): Starting lambda in the search
+          procedure. Defaults to 1.
+      - step (float, optional): Initial step at which to increase
+          lambda. Defaults to 1.
+      - tol (float, optional): Tolerance of the search procedure,
+          i.e. the search procedure stops when the instability at a given
+          lambda is below `tol` of `beta`. Defaults to 1e-5.
+      - precision_tol (float, optional): Cutoff value at which nonzero
+          elements of the precision matrix returned by GLASSO are
+          considered edges in the graph. Defaults to 1e-4.
+      - max_iter (int, optional): Maximum number of iterations for which
+          the search procedure is run, i.e. the maximum number of times
+          the estimator is run. Defaults to 20.
+      - glasso_params (dict, optional): Dictionary used to pass
+          additional parameters to sklearn.covariance.GraphicalLasso. Defaults to `{}`.
+      - debug (bool, optional): If debugging messages should be printed
+          during execution. Defaults to `False`.
 
     Returns:
-      - estimate (p x p np.array): the GLASSO estimate at the
-        regularization value selected by StARS
+      - estimate (np.array): The adjacency matrix of the resulting
+          graph estimate.
 
     """
     estimator = lambda subsamples, alpha: glasso(subsamples, alpha, precision_tol = precision_tol, glasso_params = glasso_params)
@@ -65,15 +77,14 @@ def glasso(subsamples, alpha, precision_tol=1e-4, glasso_params = {}):
     subsamples, at the given regularization level.
 
     Parameters:
-      - subsamples (N x b x p np.array): the subsample array
+      - subsamples (np.array): the subsample array
       - alpha (float): the regularization parameter at which to run
         the estimator, taken as 1/lambda, i.e, lower values mean
         sparser
 
     Returns:
-      - estimates (N x p x p): The adjacency matrix of the graph
+      - estimates (np.array): The adjacency matrices of the graphs
         estimated for each subsample
-
     """
     (N,_,p) = subsamples.shape
     precisions = np.zeros((len(subsamples),p,p))
