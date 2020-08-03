@@ -2,9 +2,9 @@
 
 ![Example](docs/demo.svg)
 
-This repository contain a Python implementation of the StARS algorithm, from the paper *"Stability Approach to Regularization Selection (StARS) for High Dimensional Graphical Models"* by Liu, Kathryn Roeder, Larry Wasserman (https://arxiv.org/pdf/1006.3316.pdf).
+This repository contains a Python implementation of the StARS algorithm, from the paper *"Stability Approach to Regularization Selection (StARS) for High Dimensional Graphical Models"* by Liu, Kathryn Roeder, Larry Wasserman (https://arxiv.org/pdf/1006.3316.pdf).
 
-> Implementation by Juan L Gamella. [Feedback](mailto:juangamella@gmail.com) is very welcome!
+> [Feedback](mailto:juangamella@gmail.com) is very welcome!
 
 ## Requirements
 
@@ -14,6 +14,7 @@ Minimum requirements (see [setup.py](setup.py)):
 - `numpy`
 
 To run with the [Graphical Lasso](https://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphicalLasso.html) from Scikit-learn:
+
 - Standard library
 - `numpy`
 - `sklearn>=0.20`
