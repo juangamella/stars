@@ -29,7 +29,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 SUITE = all
-PROJECT = template
+PROJECT = stars
 
 # Run tests
 tests: test
@@ -43,6 +43,8 @@ endif
 
 # Run the example scripts in the README
 examples:
-	PYTHONPATH=./ python docs/template_example.py
+	PYTHONPATH=./ python docs/stars_glasso_1_example.py
+	PYTHONPATH=./ python docs/stars_glasso_2_example.py
+	PYTHONPATH=./ python docs/stars_example.py
 
 .PHONY: test, tests, examples
