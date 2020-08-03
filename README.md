@@ -37,24 +37,27 @@ Returns:
 
 Parameters:
 
-<dt> X: <i>np.array</i> of size nxp</dt>
-  <dd>n observations of p variables.</dd>
-<dt> beta: <i>float</i>, optional</dt>
-   <dd>maximum allowed instability between subsample estimates.</dd>
-<dt> N: <i>int</i>, optional</dt>
-  <dd>number of subsamples, must be divisor of n. Defaults to the value recommended in the paper, i.e. <code>int(n / np.floor(10 * np.sqrt(n)))</code>.</dd>
-<dt> start: <i>float</i>, optional</dt>
-  <dd>starting lambda in the search procedure. Defaults to 1.</dd>
-<dt> step: <i>float</i>, optional</dt>
-  <dd>initial step at which to increase lambda. Defaults to 1.</dd>
-<dt> tol: <i>float</i>, optional</dt>
-  <dd>tolerance of the search procedure, i.e. the search procedure stops when the instability at a given lambda is below <code>tol</code> of <code>beta</code>. Defaults to 1e-5.</dd>
-<dt> max_iter: <i>int</i>, optional</dt>
-  <dd>max number of iterations for which the search procedure is run, i.e. the max number of times the estimator is run. Defaults to 20.</dd>
-<dt> debug  <i>bool</i>, optional</dt>
-  <dd>if debugging messages should be printed during execution. Defaults to False.
+<dl>
+  <dt> X:   <i>np.array  </i> of size nxp  </dt>
+    <dd>n observations of p variables.  </dd>
+  <dt> beta:   <i>float  </i>, optional  </dt>
+     <dd>maximum allowed instability between subsample estimates.  </dd>
+  <dt> N:   <i>int  </i>, optional  </dt>
+    <dd>number of subsamples, must be divisor of n. Defaults to the value recommended in the paper, i.e.   <code>int(n / np.floor(10 * np.sqrt(n)))  </code>.  </dd>
+  <dt> start:   <i>float  </i>, optional  </dt>
+    <dd>starting lambda in the search procedure. Defaults to 1.  </dd>
+  <dt> step:   <i>float  </i>, optional  </dt>
+    <dd>initial step at which to increase lambda. Defaults to 1.  </dd>
+  <dt> tol:   <i>float  </i>, optional  </dt>
+    <dd>tolerance of the search procedure, i.e. the search procedure stops when the instability at a given lambda is below   <code>tol  </code> of   <code>beta  </code>. Defaults to 1e-5.  </dd>
+  <dt> max_iter:   <i>int  </i>, optional  </dt>
+    <dd>max number of iterations for which the search procedure is run, i.e. the max number of times the estimator is run. Defaults to 20.  </dd>
+  <dt> debug    <i>bool  </i>, optional  </dt>
+    <dd>if debugging messages should be printed during execution. Defaults to False.  </dd>
+</dl>
 
 Returns:
-</dd>
-<dt> estimate: <i>np.array</i> if size pxp</dt>
-  <dd>The adjacency matrix of the resulting graph estimate.</dd>
+<dl>
+  <dt> estimate: <i>np.array</i> if size pxp</dt>
+    <dd>The adjacency matrix of the resulting graph estimate.</dd>
+</dl>
