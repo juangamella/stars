@@ -18,23 +18,38 @@ To run with the [Graphical Lasso](https://scikit-learn.org/stable/modules/genera
 
 The function `stars.glasso.fit` selects the regularization parameter via StARS, and then runs Scikit-learn's [Graphical Lasso](https://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphicalLasso.html) the data.
 
-Parameters:
+**Parameters**:
 
-- **X** (n x p np.array): n observations of p variables.
-- **beta** (float, optional): maximum allowed instability between subsample estimates.
-- **N** (int, optional): number of subsamples, must be divisor of n. Defaults to the value recommended in the paper, i.e. `int(n / np.floor(10 * np.sqrt(n)))`.
-- **start** (float, optional): starting lambda in the search procedure. Defaults to 1.
-- **step** (float, optional): initial step at which to increase lambda. Defaults to 1.
-- **tol** (float, optional): tolerance of the search procedure, i.e. the search procedure stops when the instability at a given lambda is below `tol` of `beta`. Defaults to 1e-5.
-- **max_iter** (int, optional): max number of iterations for which the search procedure is run, i.e. the max number of times the estimator is run. Defaults to 20.
-- **glasso_params** (dict, optional): Dictionary used to pass additional parameters to the `sklearn.covariance.GraphicalLasso`. You can see a list of available parameters [here](https://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphicalLasso.html). Defaults to `{}`.
-- **debug** (bool, optional): if debugging messages should be printed during execution. Defaults to ```python False```.
+- **X** (`np.array`): Array containing n observations of p variables. Columns are the observations of a single variable
+- **beta** (`float`, optional): Maximum allowed instability between subsample estimates.
+- **N** (`int`, optional): Number of subsamples, must be divisor of n. Defaults to the value recommended in the paper, i.e. `int(n / np.floor(10 * np.sqrt(n)))`.
+- **start** (`float`, optional): Starting lambda in the search procedure. Defaults to 1.
+- **step** (`float`, optional): Initial step at which to increase lambda. Defaults to 1.
+- **tol** (`float`, optional): Tolerance of the search procedure, i.e. the search procedure stops when the instability at a given lambda is below `tol` of `beta`. Defaults to 1e-5.
+- **max_iter** (`int`, optional): Maximum number of iterations for which the search procedure is run, i.e. the maximum number of times the estimator is run. Defaults to 20.
+- **glasso_params** (`dict`, optional): Dictionary used to pass additional parameters to `sklearn.covariance.GraphicalLasso`. You can find a list of available parameters [here](https://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphicalLasso.html). Defaults to `{}`.
+- **debug** (`bool`, optional): If debugging messages should be printed during execution. Defaults to `False`.
 
-Returns:
+**Returns**:
 
-- **estimate** (p x p np.array): The adjacency matrix of the resulting graph estimate.
+- **estimate** (`np.array`): The adjacency matrix of the resulting graph estimate.
 
-An example:
+**Example** (with default parameters):
+
+```python
+import numpy as np
+import stars, stars.glasso
+
+# Generate data from a neighbourhood graph (page 10 of the paper)
+true_precision = stars.neighbourhood_graph(p)
+true_covariance = np.linalg.inv(true_precision)
+X = np.random.multivariate_normal(np.zeros(p), true_covariance, size=n)
+
+# Run StARS + Graphical lasso
+estimate = stars.glasso.fit(X, debug=True)
+```
+
+**Example** (with additional parameters for `sklearn.covariance.GraphicalLasso`):
 
 ```python
 import numpy as np
