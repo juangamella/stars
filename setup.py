@@ -2,12 +2,12 @@ from distutils.core import setup
 
 setup(
     name='stars',
-    version='0.0.1',
+    version='1.0.0',
     author='Juan L Gamella',
     author_email='juangamella@gmail.com',
     packages=['stars', 'stars.test'],
     scripts=[],
-    url='http://pypi.python.org/pypi/stars/',
+    url='https://github.com/juangamella/stars',
     license='LICENSE.txt',
     description='Implementation of the StARS algorithm for regularization selection',
     long_description=open('README.txt').read(),
