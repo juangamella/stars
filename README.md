@@ -27,37 +27,40 @@ Parameters:
 - **step** (float, optional): initial step at which to increase lambda. Defaults to 1.
 - **tol** (float, optional): tolerance of the search procedure, i.e. the search procedure stops when the instability at a given lambda is below `tol` of `beta`. Defaults to 1e-5.
 - **max_iter** (int, optional): max number of iterations for which the search procedure is run, i.e. the max number of times the estimator is run. Defaults to 20.
-- debug (bool, optional): if debugging messages should be printed during execution. Defaults to False.
+- **debug** (bool, optional): if debugging messages should be printed during execution. Defaults to False.
 
 Returns:
 
 - **estimate** (p x p np.array): The adjacency matrix of the resulting graph estimate.
 
-## Example: Using an estimator of your choice
+An example:
+
+```python
+import numpy as np
+import stars, stars.glasso
+
+# Generate data from a neighbourhood graph (page 10 of the paper)
+true_precision = stars.neighbourhood_graph(p)
+true_covariance = np.linalg.inv(true_precision)
+X = np.random.multivariate_normal(np.zeros(p), true_covariance, size=n)
+
+# Run StARS + Graphical lasso
+estimate = stars.glasso.fit(X, debug=True)
+```
+
+## Using an estimator of your choice
 
 Parameters:
 
-<dl>
-  <dt> X:   <i>np.array  </i> of size nxp  </dt>
-    <dd>n observations of p variables.  </dd>
-  <dt> beta:   <i>float  </i>, optional  </dt>
-     <dd>maximum allowed instability between subsample estimates.  </dd>
-  <dt> N:   <i>int  </i>, optional  </dt>
-    <dd>number of subsamples, must be divisor of n. Defaults to the value recommended in the paper, i.e.   <code>int(n / np.floor(10 * np.sqrt(n)))  </code>.  </dd>
-  <dt> start:   <i>float  </i>, optional  </dt>
-    <dd>starting lambda in the search procedure. Defaults to 1.  </dd>
-  <dt> step:   <i>float  </i>, optional  </dt>
-    <dd>initial step at which to increase lambda. Defaults to 1.  </dd>
-  <dt> tol:   <i>float  </i>, optional  </dt>
-    <dd>tolerance of the search procedure, i.e. the search procedure stops when the instability at a given lambda is below   <code>tol  </code> of   <code>beta  </code>. Defaults to 1e-5.  </dd>
-  <dt> max_iter:   <i>int  </i>, optional  </dt>
-    <dd>max number of iterations for which the search procedure is run, i.e. the max number of times the estimator is run. Defaults to 20.  </dd>
-  <dt> debug    <i>bool  </i>, optional  </dt>
-    <dd>if debugging messages should be printed during execution. Defaults to False.  </dd>
-</dl>
+- **X** (n x p np.array): n observations of p variables.
+- **beta** (float, optional): maximum allowed instability between subsample estimates.
+- **N** (int, optional): number of subsamples, must be divisor of n. Defaults to the value recommended in the paper, i.e. `int(n / np.floor(10 * np.sqrt(n)))`.
+- **start** (float, optional): starting lambda in the search procedure. Defaults to 1.
+- **step** (float, optional): initial step at which to increase lambda. Defaults to 1.
+- **tol** (float, optional): tolerance of the search procedure, i.e. the search procedure stops when the instability at a given lambda is below `tol` of `beta`. Defaults to 1e-5.
+- **max_iter** (int, optional): max number of iterations for which the search procedure is run, i.e. the max number of times the estimator is run. Defaults to 20.
+- **debug** (bool, optional): if debugging messages should be printed during execution. Defaults to False.
 
 Returns:
-<dl>
-  <dt> estimate: <i>np.array</i> if size pxp</dt>
-    <dd>The adjacency matrix of the resulting graph estimate.</dd>
-</dl>
+
+- **estimate** (p x p np.array): The adjacency matrix of the resulting graph estimate.
