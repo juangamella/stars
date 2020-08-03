@@ -20,7 +20,7 @@ The function `stars.glasso.fit` selects the regularization parameter via StARS, 
 
 Parameters:
 
-**X** (n x p np.array):
+**X:** n x p np.array
 
 > n observations of p variables.
 
