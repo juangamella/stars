@@ -69,7 +69,7 @@ estimate = stars.glasso.fit(X, glasso_params = args)
 
 ## Using an estimator of your choice
 
-###Estimator function
+### Estimator function
 
 StARS can be used to select the regularization parameter for other graphical model estimators. To do this, your estimator must be wrapped in a function which takes two arguments:
 
@@ -81,7 +81,7 @@ It must return a `Nxpxp` *np.array* containing the adjacency matrix (0s or 1s) o
 Parameters (for `stars.fit`):
 
 - **X** (*np.array*): Array containing n observations of p variables. Columns are the observations of a single variable
-- **estimator** (*function*): Wrapper function for your estimator, as described [above](#estimator-function)
+- **estimator** (*function*): Wrapper function for your estimator, as described [above](###estimator-function)
 - **beta** (*float*, optional): Maximum allowed instability between subsample estimates. Defaults to 0.05, the value recommended in the paper.
 - **N** (*int*, optional): Number of subsamples, must be divisor of n. Defaults to the value recommended in the paper, i.e. `int(n / np.floor(10 * np.sqrt(n)))`.
 - **start** (*float*, optional): Starting lambda in the search procedure. Defaults to 1.
