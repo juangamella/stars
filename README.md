@@ -14,7 +14,7 @@ To run with the [Graphical Lasso](https://scikit-learn.org/stable/modules/genera
 - `numpy`
 - `sklearn>=0.20`
 
-## Using the Graphical Lasso implementation from sklearn
+## Using the Graphical Lasso estimator from sklearn
 
 The function `stars.glasso.fit` selects the regularization parameter via StARS, and then runs Scikit-learn's [Graphical Lasso](https://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphicalLasso.html) over the data.
 
@@ -34,7 +34,7 @@ Returns:
 
 - **estimate** (*np.array*): The adjacency matrix of the resulting graph estimate.
 
-Example (with default parameters and debug messages):
+Example (running `stars.glasso.fit` with default parameters and debug messages):
 
 ```python
 import numpy as np
@@ -49,7 +49,7 @@ X = np.random.multivariate_normal(np.zeros(100), true_covariance, size=400)
 estimate = stars.glasso.fit(X, debug=True)
 ```
 
-Example (with additional parameters for `sklearn.covariance.GraphicalLasso`):
+Example (running `stars.glasso.fit` with additional parameters for `sklearn.covariance.GraphicalLasso`):
 
 ```python
 import numpy as np
