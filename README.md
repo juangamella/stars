@@ -20,6 +20,14 @@ The function `stars.glasso.fit` selects the regularization parameter via StARS, 
 
 Parameters:
 
+<dl>
+  <dt>X: (n x p np.array)</dt>
+  <dd>n observations of p variables</dd>
+
+  <dt>Markdown in HTML</dt>
+  <dd>Does *not* work **very** well. Use HTML <em>tags</em>.</dd>
+</dl>
+
 - **X: (n x p np.array)**:
  
    n observations of p variables
