@@ -4,6 +4,8 @@
 
 This repository contain a Python implementation of the StARS algorithm, from the paper *"Stability Approach to Regularization Selection (StARS) for High Dimensional Graphical Models"* by Liu, Kathryn Roeder, Larry Wasserman (https://arxiv.org/pdf/1006.3316.pdf).
 
+> Implementation by Juan L Gamella. Feedback is very welcome!
+
 ## Requirements
 
 Minimum requirements (see [setup.py](setup.py)):
