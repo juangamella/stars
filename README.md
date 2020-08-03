@@ -20,27 +20,18 @@ The function `stars.glasso.fit` selects the regularization parameter via StARS, 
 
 Parameters:
 
-<dl>
-  <dt>X: (n x p np.array)</dt>
-  <dd>n observations of p variables</dd>
-
-  <dt>Markdown in HTML</dt>
-  <dd>Does *not* work **very** well. Use HTML <em>tags</em>.</dd>
-</dl>
-
-- **X: (n x p np.array)**:
- 
-   n observations of p variables
-
-- beta (float, optional): maximum allowed instability between subsample estimates
-- N (int, optional): number of subsamples, must be divisor of n. Defaults to the value recommended in the paper (https://arxiv.org/pdf/1006.3316.pdf, page 9): int(n / np.floor(10 * np.sqrt(n)))
-- start (float, optional): initial lambda
-- step (float, optional): initial step at which to increase lambda
-- tol (float, optional): tolerance of the search procedure
-- max_iter (int, optional): max number of iterations to run the search procedure, that is, max number of times the estimator is run
-- debug (bool, optional): if debugging messages should be printed during execution
+- **X** (n x p np.array): n observations of p variables.
+- **beta** (float, optional): maximum allowed instability between subsample estimates
+- **N** (int, optional): number of subsamples, must be divisor of n. Defaults to the value recommended in the paper, i.e. `int(n / np.floor(10 * np.sqrt(n)))`.
+- **start** (float, optional): starting lambda in the search procedure. Defaults to 1.
+- **step** (float, optional): initial step at which to increase lambda. Defaults to 1.
+- **tol** (float, optional): tolerance of the search procedure, i.e. the search procedure stops when the instability at a given lambda is below `tol` of `beta`. Defaults to 1e-5.
+- **max_iter** (int, optional): max number of iterations for which the search procedure is run, i.e. the max number of times the estimator is run. Defaults to 20.
+- debug (bool, optional): if debugging messages should be printed during execution. Defaults to False.
 
 Returns:
+
+- **estimate** (p x p np.array): The adjacency matrix of the graph estimate.
 
 ## Example: Using an estimator of your choice
 

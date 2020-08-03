@@ -1,15 +1,15 @@
 from distutils.core import setup
 
 setup(
-    name='python_template',
+    name='stars',
     version='0.0.1',
     author='Juan L Gamella',
     author_email='juangamella@gmail.com',
-    packages=['template', 'template.test'],
+    packages=['stars', 'stars.test'],
     scripts=[],
-    url='http://pypi.python.org/pypi/template/',
+    url='http://pypi.python.org/pypi/stars/',
     license='LICENSE.txt',
-    description='Python template module',
+    description='Implementation of the StARS algorithm for regularization selection',
     long_description=open('README.txt').read(),
-    install_requires=[]
+    install_requires=['numpy', 'sklearn>=0.20']
 )

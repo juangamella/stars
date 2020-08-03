@@ -1,4 +1,4 @@
-# Copyright 2020 Juan Luis Gamella Martin
+# Copyright 2020 Juan L Gamella
 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,6 +33,7 @@
 
 import unittest
 import stars
+import stars.glasso
 import numpy as np
 
 class StarTests(unittest.TestCase):
@@ -40,11 +41,11 @@ class StarTests(unittest.TestCase):
     def test_subsample_1(self):
         n = 100
         p = 10
-        X = np.random.uniform(size=(n, p, p))
+        X = np.random.uniform(size=(n, p))
         for N in [1, 2, 5, 10]:
             S = stars.subsample(X, N)
             # Check that all there are the right number of subsamples
-            self.assertEqual(len(S), N)            
+            self.assertEqual(len(S), N)
             # Check that the observations in each subsample are not
             # repeated in other subsamples (i.e. that there is no
             # replacement)
@@ -56,14 +57,14 @@ class StarTests(unittest.TestCase):
             # have the appropriate shape
             for s in S:
                 self.assertEqual(n / N, len(s))
-                self.assertEqual(s.shape, (n/N,p,p))
+                self.assertEqual(s.shape, (n/N,p))
 
     def test_subsample_2(self):
         # Check that an exception is thrown when the number of requested
         # subsamples is not valid
         n = 100
         p = 10
-        X = np.random.uniform(size=(n, p, p))
+        X = np.random.uniform(size=(n, p))
         for N in [0, 3, 6, 11, 21]:
             try:
                 stars.subsample(X, N)
@@ -73,6 +74,12 @@ class StarTests(unittest.TestCase):
             finally:
                 self.assertTrue(fails)
 
+    def test_subsample_3(self):
+        # Check that if the number of subsamples is 1, a single
+        # subsample with all the data returned
+        X = np.random.uniform(size=(400, 100))
+        self.assertTrue((np.array([X]) == stars.subsample(X,1)).all())
+                
     def test_optimize(self):
         thresh =  -0.75
         f = lambda x: x**0.5 - 2**x
@@ -83,28 +90,26 @@ class StarTests(unittest.TestCase):
                        0.05,
                        10,
                        debug=True)
-        opt, val = stars.optimize(f,
-                                  thresh,
-                                  0,
-                                  0.05,
-                                  10,
-                                  debug=False)
+        opt = stars.optimize(f,
+                             thresh,
+                             0,
+                             0.05,
+                             10,
+                             debug=False)
         # Check that the approximation does not get worse with the
         # number of iterations, and that it is in fact a supremum
         prev = -np.infty
         for max_iter in [5, 10, 20, 30]:
-            opt, val = stars.optimize(f,
-                                      thresh,
-                                      0,
-                                      0.05,
-                                      max_iter,
-                                      tol = 1e-6,
-                                      debug=False)
-            self.assertLessEqual(val, thresh)
+            opt = stars.optimize(f,
+                                 thresh,
+                                 0,
+                                 0.05,
+                                 max_iter,
+                                 tol = 1e-6,
+                                 debug=False)
             self.assertLessEqual(f(opt), thresh)
-            self.assertLessEqual(prev, val)
             self.assertLessEqual(prev, f(opt))
-            prev = val
+            prev = f(opt)
 
     def test_glasso(self):
         # Test that the Graphical Lasso wrapper actually returns
@@ -119,7 +124,7 @@ class StarTests(unittest.TestCase):
                                           cov=true_cov,
                                           size=400)
         S = stars.subsample(X, 4)
-        estimates = stars.glasso(S, 0.01)
+        estimates = stars.glasso.glasso(S, 0.01)
         self.assertEqual(len(S), len(estimates))
         for estimate in estimates:
             self.assertTrue(np.sum(np.logical_and(estimate != 1, estimate != 0)) == 0)
@@ -228,6 +233,25 @@ class StarTests(unittest.TestCase):
         for (n,k,truth) in cases:
             self.assertTrue(np.isclose(truth, stars.comb(n,k)))
 
+    def test_fit(self):
+        n,p = 400, 100
+        true_precision = stars.neighbourhood_graph(p)
+        true_covariance = np.linalg.inv(true_precision)        
+        X = np.random.multivariate_normal(np.zeros(p), true_covariance, size=n)
+        # With debug option
+        estimate = stars.fit(X, stars.glasso.glasso, debug=True)
+        estimate_w_glasso = stars.glasso.fit(X, debug=True)
+        print(estimate)
+        print(estimate_w_glasso)
+
+        print((estimate - estimate_w_glasso).sum())
+        
+        self.assertTrue((estimate == estimate_w_glasso).all())
+
+        # Without debug option
+        estimate = stars.fit(X, stars.glasso.glasso, debug=False)
+        estimate_w_glasso = stars.glasso.fit(X, debug=False)
+        self.assertTrue((estimate == estimate_w_glasso).all())
         
 def disjoint_rows(A, B):
     """Check that two arrays have disjoint rows"""

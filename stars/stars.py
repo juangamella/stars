@@ -1,4 +1,4 @@
-# Copyright 2020 Juan Luis Gamella Martin
+# Copyright 2020 Juan L Gamella
 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,57 +30,32 @@
 
 
 import numpy as np
-import scipy
+import math
 from sklearn.covariance import GraphicalLasso
 
 
-#---------------------------------------------------------------------
-#
-
-def fit_w_glasso(X, beta, N, start=0, step=0.05, tol=1e-5, precision_tol = 1e-4, max_iter=10, debug=False):
-    """Wrapper function to run StARS using the Graphical Lasso from
-    scikit.learn. The estimator is run with the default parameters.
+def fit(X, estimator, beta=0.05, N=None, start=1, step=1, tol=1e-5, max_iter=20, debug=False):
+    """Run the StARS algorithm to select the regularization parameter for the given estimator.
 
     Parameters:
       - X (n x p np.array): n observations of p variables
-      - beta (float): probability that the returned estimate contains
-        the true graph
-      - N (int): number of subsamples, must be divisor of n
-      - start (float): initial lambda
-      - step (float): initial step at which to increase lambda
-      - tol (float): tolerance of the search procedure
-      - max_iter (int, default=1000): max number of iterations to run
-        the search procedure, that is, max number of times the estimator
-        is run
-
-    Returns:
-      - the selected regularization parameter
-      - the subsample estimates at that regularization value
-
-    """
-    estimator = lambda subsamples, alpha: glasso(subsamples, alpha, precision_tol = precision_tol, debug=debug)
-    return fit(X, beta, estimator, N, start, step, tol, max_iter, debug)
-
-def fit(X, beta, estimator, N, start=0, step=0.05, tol=1e-5, max_iter=10, debug=False):
-    """
-    Run the StARS algorithm to select the regularization parameter for the given estimator.
-
-    Parameters:
-      - X (n x p np.array): n observations of p variables
-      - beta (float): probability that the returned estimate contains
-        the true graph
       - estimator (function): estimator to be used*
-      - N (int): number of subsamples, must be divisor of n
-      - start (float): initial lambda
-      - step (float): initial step at which to increase lambda
-      - tol (float): tolerance of the search procedure
-      - max_iter (int, default=1000): max number of iterations to run
+      - beta (float, optional): maximum allowed instability between subsample estimates
+      - N (int, optional): number of subsamples, must be divisor of n. Defaults
+        to the value recommended in the paper
+        (https://arxiv.org/pdf/1006.3316.pdf, page 9): int(n / np.floor(10 * np.sqrt(n)))
+      - start (float, optional): initial lambda
+      - step (float, optional): initial step at which to increase lambda
+      - tol (float, optional): tolerance of the search procedure
+      - max_iter (int, optional): max number of iterations to run
         the search procedure, that is, max number of times the estimator
         is run
+      - debug (bool, optiona): if debugging messages should be printed
+        during execution
 
     Returns:
-      - the selected regularization parameter
-      - the subsample estimates at that regularization value
+      - estimate (p x p np.array): the estimate at the regularization
+        value selected by StARS
 
     *Note on the estimator: It must be a function that takes as arguments:
       - subsamples (N x p x p np.array)
@@ -90,15 +65,17 @@ def fit(X, beta, estimator, N, start=0, step=0.05, tol=1e-5, max_iter=10, debug=
     (n,p) = X.shape
     # Standardize the data
     X = (X - X.mean(axis=0)) / X.std(axis=0)
-    # Subsample the data
-    subsamples = subsample(X, N)
+    # Select the number of subsamples
+    if N is None:
+        N = int(n / np.floor(10 * np.sqrt(n)))
+    subsamples = subsample(X, N) # Subsample the data
     # Solve the supremum alpha as in
     # (https://arxiv.org/pdf/1006.3316.pdf, page 6)
     # Set up functions for the search procedure
     search_fun = lambda lmbda: estimate_instability(subsamples, estimator, lmbda)
-    # Run the search procedure
-    opt_lambda, estimates = optimize(search_fun, beta, start, step, max_iter, tol, debug)
-    return opt_lambda, estimates
+    opt = optimize(search_fun, beta, start, step, max_iter, tol, debug)
+    # Fit over all data using the optimal regularization parameter
+    return estimator(subsample(X, 1), opt)[0]
 
 def subsample(X, N):
     """
@@ -110,11 +87,15 @@ def subsample(X, N):
 
     Returns:
       - Subsamples (N x n/N x p np.array)
-    """    
+    """
+    # Check that N is appropriate
     if len(X) % N != 0 or N == 0:
         raise Exception("The number of samples must be a multiple of N")
+    if N == 1:
+        return np.array([X])
     b = int(len(X) / N)
     rng = np.random.default_rng()
+    # Subsample without replacement
     return rng.choice(X, axis=0, replace=False, size=(N,b))
 
 def estimate_instability(subsamples, estimator, lmbda, return_estimates=False):
@@ -137,42 +118,12 @@ def estimate_instability(subsamples, estimator, lmbda, return_estimates=False):
     edge_instability = 2 * edge_average * (1-edge_average)
     # In the following, the division by 2 is to account for counting
     # every edge twice (as the estimate matrix is symmetric)
-    total_instability = np.sum(edge_instability, axis=(0,1)) / scipy.special.binom(p,2) / 2
+    total_instability = np.sum(edge_instability, axis=(0,1)) / comb(p, 2) / 2
     if return_estimates:
         return total_instability, estimates
     else:
         return total_instability
     
-def glasso(subsamples, alpha, precision_tol=1e-4, mode='cd', return_precisions = False, debug=False):
-    """Run the graphical lasso from scikit learn over the given
-    subsamples, at the given regularization level.
-
-    Parameters:
-      - subsamples (N x b x p np.array): the subsample array
-      - alpha (float): the regularization parameter at which to run
-        the estimator, taken as 1/lambda, i.e, lower values mean
-        sparser
-
-    Returns:
-      - estimates (N x p x p): The adjacency matrix of the graph
-        estimated for each subsample
-
-    """
-    (N,_,p) = subsamples.shape
-    precisions = np.zeros((len(subsamples),p,p))
-    g = GraphicalLasso(alpha = 1 / alpha,
-                       #tol = tol,
-                       #max_iter = max_iter,
-                       mode = mode)
-    for j,sample in enumerate(subsamples):
-        precision = g.fit(sample).precision_
-        precisions[j,:,:] = precision - np.diag(np.diag(precision))
-    estimates = (abs(precisions) > precision_tol).astype(int)
-    if return_precisions:
-        return estimates, precisions
-    else:
-        return estimates
-
 def optimize(fun, thresh, start, step, max_iter, tol = 1e-5, debug=False):
     """Given a function fun:X -> R and a (float) threshold thresh,
     approximate the supremum \sup_x \{fun(x) \leq thresh\}. Adapted
@@ -204,4 +155,27 @@ def optimize(fun, thresh, start, step, max_iter, tol = 1e-5, debug=False):
             x += step
             val = next_val
         i += 1
-    return x, val
+    return x
+
+def comb(n,k):
+    """Return the number of ways to choose k items from n items without
+    repetition and without order."""
+    return math.factorial(n) / (math.factorial(k) * math.factorial(n-k))
+
+def neighbourhood_graph(p, max_nonzero=2, rho=0.245):
+    """Generate a "neighborhood graph" o p variables as described in page 10 of the
+    paper (https://arxiv.org/pdf/1006.3316.pdf). Return its precision matrix."""
+    Y = np.random.uniform(size=(p,2))
+    prob = np.zeros((p,p))
+    precision = np.zeros((p,p))
+    for i in range(p):
+        for j in range(p):
+            if i!=j:
+                dist = (Y[i,:] - Y[j,:]) @ (Y[i,:] - Y[j,:]).T
+                prob[i,j] = 1 / np.sqrt(2*np.pi) * np.exp(-16 * dist)
+    for i in range(p):
+        indices = np.argsort(prob[i,:])[-max_nonzero:]
+        precision[i,indices] = rho
+        precision[indices,i] = rho
+    precision[range(p), range(p)] = 1
+    return precision
