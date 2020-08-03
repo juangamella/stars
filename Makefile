@@ -45,5 +45,6 @@ endif
 examples:
 	PYTHONPATH=./ python docs/stars_glasso_1_example.py
 	PYTHONPATH=./ python docs/stars_glasso_2_example.py
+	PYTHONPATH=./ python docs/stars_example.py
 
 .PHONY: test, tests, examples

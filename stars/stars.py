@@ -73,7 +73,7 @@ def fit(X, estimator, beta=0.05, N=None, start=1, step=1, tol=1e-5, max_iter=20,
     # (https://arxiv.org/pdf/1006.3316.pdf, page 6)
     # Set up functions for the search procedure
     search_fun = lambda lmbda: estimate_instability(subsamples, estimator, lmbda)
-    opt = optimize(search_fun, beta, start, step, max_iter, tol, debug)
+    opt = find_supremum(search_fun, beta, start, step, max_iter, tol, debug)
     # Fit over all data using the optimal regularization parameter
     return estimator(subsample(X, 1), opt)[0]
 
@@ -124,7 +124,7 @@ def estimate_instability(subsamples, estimator, lmbda, return_estimates=False):
     else:
         return total_instability
     
-def optimize(fun, thresh, start, step, max_iter, tol = 1e-5, debug=False):
+def find_supremum(fun, thresh, start, step, max_iter, tol = 1e-5, debug=False):
     """Given a function fun:X -> R and a (float) threshold thresh,
     approximate the supremum \sup_x \{fun(x) \leq thresh\}. Adapted
     version of the bisection method.

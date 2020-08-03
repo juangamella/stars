@@ -69,17 +69,50 @@ estimate = stars.glasso.fit(X, glasso_params = args)
 
 ## Using an estimator of your choice
 
-Parameters:
+**Estimator function**
+(#estimator-function)
+StARS can be used to select the regularization parameter for other graphical model estimators. To do this, your estimator must be wrapped in a function which takes two arguments:
 
-- **X** (n x p np.array): n observations of p variables.
-- **beta** (float, optional): maximum allowed instability between subsample estimates.
-- **N** (int, optional): number of subsamples, must be divisor of n. Defaults to the value recommended in the paper, i.e. `int(n / np.floor(10 * np.sqrt(n)))`.
-- **start** (float, optional): starting lambda in the search procedure. Defaults to 1.
-- **step** (float, optional): initial step at which to increase lambda. Defaults to 1.
-- **tol** (float, optional): tolerance of the search procedure, i.e. the search procedure stops when the instability at a given lambda is below `tol` of `beta`. Defaults to 1e-5.
-- **max_iter** (int, optional): max number of iterations for which the search procedure is run, i.e. the max number of times the estimator is run. Defaults to 20.
-- **debug** (bool, optional): if debugging messages should be printed during execution. Defaults to False.
+- **subsamples** (*np.array*): An array containing the subsampled data, of dimension `Nxbxp`, where `N` is the number of subsamples, `b=n/N` and `p` is the number of variables.
+- **lambda** (*float): The regularization value at which to run the estimator.
+
+It must return a `Nxpxp` *np.array* containing the adjacency matrix (0s or 1s) of the estimate for each subsample. There is a complete example below.
+
+Parameters (for `stars.fit`):
+
+- **X** (*np.array*): Array containing n observations of p variables. Columns are the observations of a single variable
+- **estimator** (*function*): Wrapper function for your estimator, as described [above](#estimator-function)
+- **beta** (*float*, optional): Maximum allowed instability between subsample estimates. Defaults to 0.05, the value recommended in the paper.
+- **N** (*int*, optional): Number of subsamples, must be divisor of n. Defaults to the value recommended in the paper, i.e. `int(n / np.floor(10 * np.sqrt(n)))`.
+- **start** (*float*, optional): Starting lambda in the search procedure. Defaults to 1.
+- **step** (*float*, optional): Initial step at which to increase lambda. Defaults to 1.
+- **tol** (*float*, optional): Tolerance of the search procedure, i.e. the search procedure stops when the instability at a given lambda is below `tol` of `beta`. Defaults to 1e-5.
+- **max_iter** (*int*, optional): Maximum number of iterations for which the search procedure is run, i.e. the maximum number of times the estimator is run. Defaults to 20.
+- **debug** (*bool*, optional): If debugging messages should be printed during execution. Defaults to `False`.
 
 Returns:
 
 - **estimate** (p x p np.array): The adjacency matrix of the resulting graph estimate.
+
+An example:
+
+```python
+import numpy as np
+import stars
+
+# Define a dummy estimator (returns the same estimate for all subsamples)
+def estimator(subsamples, lmbda):
+    p = subsamples.shape[2]
+    A = np.triu(np.random.uniform(size=(p,p)), k=1)
+    A += A.T
+    A = A > 0.5
+    return np.array([A] * len(subsamples))
+
+# Generate data from a neighbourhood graph (page 10 of the paper)
+true_precision = stars.neighbourhood_graph(100)
+true_covariance = np.linalg.inv(true_precision)
+X = np.random.multivariate_normal(np.zeros(100), true_covariance, size=400)
+
+# Run StARS + Graphical lasso
+stars.fit(X, estimator)
+```
