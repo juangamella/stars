@@ -43,6 +43,7 @@ endif
 
 # Run the example scripts in the README
 examples:
-	PYTHONPATH=./ python docs/template_example.py
+	PYTHONPATH=./ python docs/stars_glasso_1_example.py
+	PYTHONPATH=./ python docs/stars_glasso_2_example.py
 
 .PHONY: test, tests, examples

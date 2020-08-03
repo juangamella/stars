@@ -148,7 +148,7 @@ def optimize(fun, thresh, start, step, max_iter, tol = 1e-5, debug=False):
     while i < max_iter and thresh - val > tol:        
         next_val = fun(x + step)
         if next_val > thresh:
-            print("  ",i,": f(", x+ step, ")=",val,">", thresh)
+            print("  ",i,": f(", x+ step, ")=",val,">", thresh) if debug else None
             step /= 2
         else:
             print("JUMP ",i,": f(", x+ step, ")=",val," - delta: ", thresh - val) if debug else None
