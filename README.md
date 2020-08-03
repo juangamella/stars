@@ -21,7 +21,9 @@ The function `stars.glasso.fit` selects the regularization parameter via StARS, 
 Parameters:
 
 - **X: (n x p np.array)**:
- n observations of p variables
+ 
+   n observations of p variables
+
 - beta (float, optional): maximum allowed instability between subsample estimates
 - N (int, optional): number of subsamples, must be divisor of n. Defaults to the value recommended in the paper (https://arxiv.org/pdf/1006.3316.pdf, page 9): int(n / np.floor(10 * np.sqrt(n)))
 - start (float, optional): initial lambda
