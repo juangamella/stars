@@ -245,7 +245,12 @@ class StarTests(unittest.TestCase):
         # Without debug option
         estimate = stars.fit(X, stars.glasso.glasso, debug=False)
         estimate_w_glasso = stars.glasso.fit(X, debug=False)
-        
+
+    def test_N(self):
+        for n in [1000, 5000, 100, 20, 30, 12, 24]:
+            N = stars.find_N(n)
+            self.assertTrue(n % N == 0)
+    
 def disjoint_rows(A, B):
     """Check that two arrays have disjoint rows"""
     for a in A:

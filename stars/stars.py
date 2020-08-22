@@ -47,7 +47,7 @@ def fit(X, estimator, beta=0.05, N=None, start=1, step=1, tol=1e-5, max_iter=20,
           paper.
       - N (int, optional): Number of subsamples, must be divisor of
           n. Defaults to the value recommended in the paper,
-          i.e. int(n / np.floor(10 np.sqrt(n))).
+          i.e. approximately int(n / np.floor(10 np.sqrt(n))).
       - start (float, optional): Starting lambda in the search
           procedure. Defaults to 1.
       - step (float, optional): Initial step at which to increase
@@ -80,7 +80,7 @@ def fit(X, estimator, beta=0.05, N=None, start=1, step=1, tol=1e-5, max_iter=20,
     X = (X - X.mean(axis=0)) / X.std(axis=0)
     # Select the number of subsamples
     if N is None:
-        N = int(n / np.floor(10 * np.sqrt(n)))
+        N = find_N(n)
     subsamples = subsample(X, N) # Subsample the data
     # Solve the supremum alpha as in
     # (https://arxiv.org/pdf/1006.3316.pdf, page 6)
@@ -202,3 +202,14 @@ def neighbourhood_graph(p, max_nonzero=2, rho=0.245):
         precision[indices,i] = rho
     precision[range(p), range(p)] = 1
     return precision
+
+def find_N(n):
+    """Find the value of N closest to the value specified in the paper, i.e.
+          n / np.floor(10 * np.sqrt(n))
+    which is a divisor of n"""
+    N_lo = N_hi = int(n / np.floor(10 * np.sqrt(n)))
+    while (n % N_lo) != 0 and (n % N_hi) != 0:
+        N_lo -= 1
+        N_hi += 1
+    N = N_lo if (n % N_lo == 0) else N_hi
+    return N
