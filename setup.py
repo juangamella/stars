@@ -11,5 +11,5 @@ setup(
     license='LICENSE.txt',
     description='Implementation of the StARS algorithm for regularization selection',
     long_description=open('README.txt').read(),
-    install_requires=['numpy', 'sklearn>=0.20']
+    install_requires=['numpy', 'scikit-learn>=0.20']
 )
